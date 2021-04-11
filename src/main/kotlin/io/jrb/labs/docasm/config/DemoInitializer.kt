@@ -24,8 +24,11 @@
 package io.jrb.labs.docasm.config
 
 import io.jrb.labs.docasm.constants.DocumentType
+import io.jrb.labs.docasm.constants.SectionType
 import io.jrb.labs.docasm.resource.DocumentResource
+import io.jrb.labs.docasm.resource.SectionResource
 import io.jrb.labs.docasm.service.DocumentService
+import io.jrb.labs.docasm.service.SectionService
 import mu.KotlinLogging
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
@@ -33,11 +36,19 @@ import reactor.core.publisher.Flux
 import java.time.Duration
 import java.util.Arrays
 
-class DemoInitializer(val documentService: DocumentService) : ApplicationListener<ApplicationReadyEvent> {
+class DemoInitializer(
+    val documentService: DocumentService,
+    val sectionService: SectionService
+) : ApplicationListener<ApplicationReadyEvent> {
 
     private val log = KotlinLogging.logger {}
 
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
+        createDocuments()
+        createSections()
+    }
+
+    private fun createDocuments() {
         log.info("Creating Documents")
         log.info("------------------")
         Flux.fromIterable(Arrays.asList(
@@ -51,6 +62,23 @@ class DemoInitializer(val documentService: DocumentService) : ApplicationListene
         log.info("------------------------------")
         documentService.listAllDocuments()
             .doOnNext { document -> log.info(document.toString()) }
+            .blockLast(Duration.ofSeconds(10))
+    }
+
+    private fun createSections() {
+        log.info("Creating Section")
+        log.info("----------------")
+        Flux.fromIterable(Arrays.asList(
+            SectionResource.Builder().name("Sectiion1").type(SectionType.SONG).tag("A").build()
+        ))
+            .flatMap { sectionService.createSection(it) }
+            .blockLast(Duration.ofSeconds(10))
+
+        // fetch all customers
+        log.info("Sections found with findAll()")
+        log.info("-----------------------------")
+        sectionService.listAllSections()
+            .doOnNext { section -> log.info(section.toString()) }
             .blockLast(Duration.ofSeconds(10))
     }
 

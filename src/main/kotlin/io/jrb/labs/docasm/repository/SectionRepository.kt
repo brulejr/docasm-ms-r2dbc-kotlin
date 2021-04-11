@@ -21,9 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.model
+package io.jrb.labs.docasm.repository
 
-enum class EntityType {
-    DOCUMENT,
-    SECTION
-}
+import io.jrb.labs.common.repository.EntityRepository
+import io.jrb.labs.docasm.model.Section
+import org.springframework.stereotype.Repository
+
+@Repository
+interface SectionRepository : EntityRepository<Section>

@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.docasm.repository
 
+import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValue
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.stereotype.Repository
@@ -32,8 +33,8 @@ import reactor.core.publisher.Mono
 @Repository
 interface LookupValueRepository : ReactiveCrudRepository<LookupValue, Long> {
 
-    fun deleteByEntityId(entityId: Long): Mono<Void>
+    fun deleteByEntityTypeAndEntityId(type: EntityType, entityId: Long): Mono<Void>
 
-    fun findByEntityId(entityId: Long): Flux<LookupValue>
+    fun findByEntityTypeAndEntityId(type: EntityType, entityId: Long): Flux<LookupValue>
 
 }

@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.model
+package io.jrb.labs.docasm.constants
 
-enum class EntityType {
-    DOCUMENT,
-    SECTION
+enum class SectionType {
+    SONG
 }

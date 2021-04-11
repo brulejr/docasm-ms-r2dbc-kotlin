@@ -16,3 +16,14 @@ CREATE TABLE IF NOT EXISTS t_document (
     do_modified_by VARCHAR(64),
     do_modified_on TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS t_section (
+    se_id SERIAL PRIMARY KEY,
+    se_guid UUID NOT NULL,
+    se_type VARCHAR(64) NOT NULL,
+    se_name VARCHAR(64) NOT NULL,
+    se_created_by VARCHAR(64),
+    se_created_on TIMESTAMP,
+    se_modified_by VARCHAR(64),
+    se_modified_on TIMESTAMP
+);

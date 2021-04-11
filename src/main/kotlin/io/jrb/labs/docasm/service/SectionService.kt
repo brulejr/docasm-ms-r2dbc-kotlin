@@ -4,7 +4,7 @@
  * Copyright (c) 2021 Jon Brule <brulejr@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
+ * of this software and associated sectionation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
@@ -26,13 +26,13 @@ package io.jrb.labs.docasm.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonpatch.JsonPatch
 import io.jrb.labs.common.service.CrudService
-import io.jrb.labs.docasm.model.Document
+import io.jrb.labs.docasm.model.Section
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValue
 import io.jrb.labs.docasm.model.LookupValueType
-import io.jrb.labs.docasm.repository.DocumentRepository
+import io.jrb.labs.docasm.repository.SectionRepository
 import io.jrb.labs.docasm.repository.LookupValueRepository
-import io.jrb.labs.docasm.resource.DocumentResource
+import io.jrb.labs.docasm.resource.SectionResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
@@ -40,31 +40,31 @@ import reactor.core.publisher.Mono
 import java.util.UUID
 
 @Service
-class DocumentService(
-    val documentRepository: DocumentRepository,
+class SectionService(
+    val sectionRepository: SectionRepository,
     val lookupValueRepository: LookupValueRepository,
     val objectMapper: ObjectMapper
-) : CrudService<Document, DocumentResource>(
-    documentRepository,
-    "Document",
-    Document::class.java,
-    Document.Builder::class.java,
-    DocumentResource::class.java,
-    DocumentResource.Builder::class.java,
+) : CrudService<Section, SectionResource>(
+    sectionRepository,
+    "Section",
+    Section::class.java,
+    Section.Builder::class.java,
+    SectionResource::class.java,
+    SectionResource.Builder::class.java,
     objectMapper
 ) {
 
     @Transactional
-    fun createDocument(documentResource: DocumentResource): Mono<DocumentResource> {
-        return super.createEntity(documentResource)
-            .flatMap { document ->
-                val documentId = document.id!!
+    fun createSection(sectionResource: SectionResource): Mono<SectionResource> {
+        return super.createEntity(sectionResource)
+            .flatMap { section ->
+                val sectionId = section.id!!
                 Mono.zip(
-                    Mono.just(document),
-                    createLookupValues(EntityType.DOCUMENT, documentId, LookupValueType.TAG, documentResource.tags)
+                    Mono.just(section),
+                    createLookupValues(EntityType.SECTION, sectionId, LookupValueType.TAG, sectionResource.tags)
                 )}
             .map { tuple ->
-                DocumentResource.Builder(tuple.t1)
+                SectionResource.Builder(tuple.t1)
                     .tags(tuple.t2)
                     .build()
             }
@@ -72,18 +72,18 @@ class DocumentService(
 
 
     @Transactional
-    fun deleteDocument(guid: UUID): Mono<Void> {
+    fun deleteSection(guid: UUID): Mono<Void> {
         return super.findEntityByGuid(guid)
-            .flatMap { document -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.DOCUMENT, document.id!!) }
+            .flatMap { section -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.SECTION, section.id!!) }
             .then(super.delete(guid))
     }
 
     @Transactional
-    fun findDocumentByGuid(guid: UUID): Mono<DocumentResource> {
+    fun findSectionByGuid(guid: UUID): Mono<SectionResource> {
         return super.findEntityByGuid(guid)
-            .zipWhen { document -> findLookupValueList(EntityType.DOCUMENT, document.id!!) }
+            .zipWhen { section -> findLookupValueList(EntityType.SECTION, section.id!!) }
             .map { tuple ->
-                val builder = DocumentResource.Builder(tuple.t1)
+                val builder = SectionResource.Builder(tuple.t1)
                 tuple.t2.forEach { lookupValue ->
                     val value = lookupValue.value
                     when (lookupValue.valueType) {
@@ -96,12 +96,12 @@ class DocumentService(
     }
 
     @Transactional
-    fun listAllDocuments(): Flux<DocumentResource> {
+    fun listAllSections(): Flux<SectionResource> {
         return super.listAll()
     }
 
     @Transactional
-    fun updateDocument(guid: UUID, patch: JsonPatch): Mono<DocumentResource> {
+    fun updateSection(guid: UUID, patch: JsonPatch): Mono<SectionResource> {
         return super.update(guid, patch)
     }
 

@@ -25,6 +25,7 @@ package io.jrb.labs.docasm.config
 
 import io.jrb.labs.common.h2.H2ConsoleServer
 import io.jrb.labs.docasm.service.DocumentService
+import io.jrb.labs.docasm.service.SectionService
 import io.r2dbc.spi.ConnectionFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -43,7 +44,8 @@ import org.springframework.transaction.ReactiveTransactionManager
 class DatabaseJavaConfig(db: DatabaseClient) {
 
     @Bean
-    fun demoInitializer(documentService: DocumentService) = DemoInitializer(documentService)
+    fun demoInitializer(documentService: DocumentService, sectionService: SectionService) =
+        DemoInitializer(documentService, sectionService)
 
     @Bean
     fun schemaInitializer(@Qualifier("connectionFactory") connectionFactory: ConnectionFactory?): ConnectionFactoryInitializer? {
