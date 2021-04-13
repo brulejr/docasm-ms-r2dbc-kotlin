@@ -35,13 +35,13 @@ data class LookupValue(
     val id: Long? = null,
 
     @Column(value = "lv_entity_type")
-    val entityType: EntityType,
+    val entityType: String,
 
     @Column(value = "lv_entity_id")
     val entityId: Long,
 
     @Column(value = "lv_value_type")
-    val valueType: LookupValueType,
+    val valueType: String,
 
     @Column(value = "lv_value")
     val value: String

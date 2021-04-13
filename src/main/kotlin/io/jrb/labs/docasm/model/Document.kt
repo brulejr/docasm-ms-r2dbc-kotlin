@@ -36,7 +36,6 @@ import java.util.UUID
 @Table(value = "t_document")
 data class Document(
 
-    @Id
     @Column(value = "do_id")
     override val id: Long? = null,
 

@@ -36,7 +36,6 @@ import java.util.UUID
 @Table(value = "t_section")
 data class Section(
 
-    @Id
     @Column(value = "se_id")
     override val id: Long? = null,
 

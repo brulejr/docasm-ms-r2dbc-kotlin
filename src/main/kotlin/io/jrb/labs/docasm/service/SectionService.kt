@@ -61,7 +61,7 @@ class SectionService(
                 val sectionId = section.id!!
                 Mono.zip(
                     Mono.just(section),
-                    createLookupValues(EntityType.SECTION, sectionId, LookupValueType.TAG, sectionResource.tags)
+                    createLookupValues(EntityType.SECTION.name, sectionId, LookupValueType.TAG.name, sectionResource.tags)
                 )}
             .map { tuple ->
                 SectionResource.Builder(tuple.t1)
@@ -74,20 +74,20 @@ class SectionService(
     @Transactional
     fun deleteSection(guid: UUID): Mono<Void> {
         return super.findEntityByGuid(guid)
-            .flatMap { section -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.SECTION, section.id!!) }
+            .flatMap { section -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.SECTION.name, section.id!!) }
             .then(super.delete(guid))
     }
 
     @Transactional
     fun findSectionByGuid(guid: UUID): Mono<SectionResource> {
         return super.findEntityByGuid(guid)
-            .zipWhen { section -> findLookupValueList(EntityType.SECTION, section.id!!) }
+            .zipWhen { section -> findLookupValueList(EntityType.SECTION.name, section.id!!) }
             .map { tuple ->
                 val builder = SectionResource.Builder(tuple.t1)
                 tuple.t2.forEach { lookupValue ->
                     val value = lookupValue.value
                     when (lookupValue.valueType) {
-                        LookupValueType.TAG -> builder.tag(value)
+                        LookupValueType.TAG.name -> builder.tag(value)
                         else -> { }
                     }
                 }
@@ -105,7 +105,7 @@ class SectionService(
         return super.update(guid, patch)
     }
 
-    private fun createLookupValues(entityType: EntityType, entityId: Long, valueType: LookupValueType, values: List<String>): Mono<List<String>> {
+    private fun createLookupValues(entityType: String, entityId: Long, valueType: String, values: List<String>): Mono<List<String>> {
         return Flux.fromIterable(values)
             .map { value -> LookupValue(null, entityType, entityId, valueType, value) }
             .flatMap { lookupValueRepository.save(it) }
@@ -113,7 +113,7 @@ class SectionService(
             .collectList()
     }
 
-    private fun findLookupValueList(entityType: EntityType, entityId: Long): Mono<List<LookupValue>> {
+    private fun findLookupValueList(entityType: String, entityId: Long): Mono<List<LookupValue>> {
         return lookupValueRepository.findByEntityTypeAndEntityId(entityType, entityId)
             .collectList()
     }
