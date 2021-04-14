@@ -6,6 +6,16 @@ CREATE TABLE IF NOT EXISTS t_lookup_value (
     lv_value VARCHAR(64) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS t_author (
+    au_id SERIAL PRIMARY KEY,
+    au_guid UUID NOT NULL,
+    au_name VARCHAR(64) NOT NULL,
+    au_created_by VARCHAR(64),
+    au_created_on TIMESTAMP,
+    au_modified_by VARCHAR(64),
+    au_modified_on TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS t_document (
     do_id SERIAL PRIMARY KEY,
     do_guid UUID NOT NULL,
