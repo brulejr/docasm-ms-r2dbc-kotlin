@@ -4,10 +4,8 @@ import io.jrb.labs.common.service.ResourceNotFoundException
 import io.jrb.labs.common.service.ServiceException
 import io.jrb.labs.docasm.model.Author
 import io.jrb.labs.docasm.model.EntityType
-import io.jrb.labs.docasm.model.LookupValue
 import io.jrb.labs.docasm.model.LookupValueType
 import io.jrb.labs.docasm.repository.AuthorRepository
-import io.jrb.labs.docasm.repository.LookupValueRepository
 import io.jrb.labs.docasm.resource.AuthorRequest
 import io.jrb.labs.docasm.resource.AuthorResource
 import mu.KotlinLogging
@@ -21,7 +19,7 @@ import java.util.UUID
 @Service
 class AuthorService(
     val authorRepository: AuthorRepository,
-    val lookupValueRepository: LookupValueRepository
+    val lookupValueService: LookupValueService
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -40,7 +38,7 @@ class AuthorService(
                 val authorId = author.id!!
                 Mono.zip(
                     Mono.just(author),
-                    createLookupValues(EntityType.AUTHOR.name, authorId, LookupValueType.TAG.name, authorRequest.tags)
+                    lookupValueService.createLookupValues(EntityType.AUTHOR.name, authorId, LookupValueType.TAG.name, authorRequest.tags)
                 )
             }
             .map { tuple -> AuthorResource(author = tuple.t1, tags = tuple.t2) }
@@ -51,7 +49,7 @@ class AuthorService(
     fun findByGuid(guid: UUID): Mono<AuthorResource> {
         return authorRepository.findByGuid(guid)
             .switchIfEmpty(Mono.error(ResourceNotFoundException("Author", guid)))
-            .zipWhen { document -> findLookupValueList(EntityType.DOCUMENT.name, document.id!!) }
+            .zipWhen { document -> lookupValueService.findLookupValueList(EntityType.AUTHOR.name, document.id!!) }
             .map { tuple -> AuthorResource(author = tuple.t1, tags = tuple.t2) }
             .onErrorResume(serviceErrorHandler("Unexpected error when finding 'Author'"))
     }
@@ -61,20 +59,6 @@ class AuthorService(
         return authorRepository.findAll()
             .map { AuthorResource(author = it) }
             .onErrorResume(serviceErrorHandler("Unexpected error when retrieving Author"))
-    }
-
-    private fun createLookupValues(entityType: String, entityId: Long, valueType: String, values: List<String>): Mono<List<String>> {
-        return Flux.fromIterable(values)
-            .map { value -> LookupValue(null, entityType, entityId, valueType, value) }
-            .flatMap { lookupValueRepository.save(it) }
-            .map(LookupValue::value)
-            .collectList()
-    }
-
-    private fun findLookupValueList(entityType: String, entityId: Long): Mono<List<String>> {
-        return lookupValueRepository.findByEntityTypeAndEntityId(entityType, entityId)
-            .map { it.value }
-            .collectList()
     }
 
     private fun <R> serviceErrorHandler(message: String): (Throwable) -> Mono<R> {

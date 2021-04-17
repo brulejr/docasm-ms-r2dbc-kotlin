@@ -32,8 +32,8 @@ import reactor.core.publisher.Mono
 @Repository
 interface LookupValueRepository : ReactiveCrudRepository<LookupValue, Long> {
 
-    fun deleteByEntityTypeAndEntityId(type: String, entityId: Long): Mono<Void>
+    fun deleteByEntityTypeAndEntityId(entityType: String, entityId: Long): Mono<Void>
 
-    fun findByEntityTypeAndEntityId(type: String, entityId: Long): Flux<LookupValue>
+    fun findByEntityTypeAndEntityId(entityType: String, entityId: Long): Flux<LookupValue>
 
 }
