@@ -24,6 +24,7 @@
 package io.jrb.labs.docasm.model
 
 enum class EntityType {
+    AUTHOR,
     DOCUMENT,
     SECTION
 }
