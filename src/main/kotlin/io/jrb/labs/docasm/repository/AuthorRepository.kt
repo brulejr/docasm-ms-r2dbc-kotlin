@@ -25,18 +25,10 @@ package io.jrb.labs.docasm.repository
 
 import io.jrb.labs.common.repository.EntityRepository
 import io.jrb.labs.docasm.model.Author
-import io.jrb.labs.docasm.projection.AuthorProjection
-import io.jrb.labs.docasm.projection.AuthorSummaryProjection
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.UUID
 
 @Repository
-interface AuthorRepository : EntityRepository<Author> {
-
-    fun findAllBy(): Flux<AuthorSummaryProjection>
-
-    fun findAuthorByGuid(guid: UUID): Mono<AuthorProjection>
-
-}
+interface AuthorRepository : EntityRepository<Author>

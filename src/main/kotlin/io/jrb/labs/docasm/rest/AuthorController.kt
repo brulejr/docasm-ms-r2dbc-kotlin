@@ -1,9 +1,9 @@
 package io.jrb.labs.docasm.rest
 
-import io.jrb.labs.docasm.projection.AuthorProjection
-import io.jrb.labs.docasm.projection.AuthorSummaryProjection
 import io.jrb.labs.docasm.resource.AuthorRequest
+import io.jrb.labs.docasm.resource.AuthorResource
 import io.jrb.labs.docasm.service.AuthorService
+import mu.KotlinLogging
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
@@ -26,18 +26,20 @@ class AuthorController(
     val authorService: AuthorService
 ) {
 
+    private val log = KotlinLogging.logger {}
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody author: AuthorRequest): Mono<EntityModel<AuthorProjection>> {
+    fun create(@Valid @RequestBody author: AuthorRequest): Mono<EntityModel<AuthorResource>> {
         return authorService.create(author).map {
             EntityModel.of(it)
-                .add(selfLink(it.guid!!))
+                .add(selfLink(it.guid))
                 .add(collectionLink())
         }
     }
 
     @GetMapping("/{authorGuid}")
-    fun getById(@PathVariable authorGuid: UUID): Mono<EntityModel<AuthorProjection>> {
+    fun getById(@PathVariable authorGuid: UUID): Mono<EntityModel<AuthorResource>> {
         return authorService.findByGuid(authorGuid).map {
             EntityModel.of(it)
                 .add(selfLink(authorGuid))
@@ -46,10 +48,10 @@ class AuthorController(
     }
 
     @GetMapping
-    fun list(): Flux<EntityModel<AuthorSummaryProjection>> {
+    fun list(): Flux<EntityModel<AuthorResource>> {
         return authorService.listAll().map {
             EntityModel.of(it)
-                .add(selfLink(it.guid!!))
+                .add(selfLink(it.guid))
         }
     }
 

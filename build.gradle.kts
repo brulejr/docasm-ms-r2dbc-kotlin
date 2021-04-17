@@ -18,7 +18,6 @@ repositories {
 extra["springCloudVersion"] = "2020.0.2"
 
 dependencies {
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("com.github.java-json-tools:json-patch:1.12")
 	implementation("io.github.microutils:kotlin-logging:1.7.9")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")

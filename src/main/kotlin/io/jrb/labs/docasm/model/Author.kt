@@ -1,6 +1,7 @@
 package io.jrb.labs.docasm.model
 
 import io.jrb.labs.common.model.Entity
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
@@ -9,6 +10,7 @@ import java.util.UUID
 @Table(value = "t_author")
 data class Author(
 
+    @Id
     @Column(value = "au_id")
     override val id: Long? = null,
 
