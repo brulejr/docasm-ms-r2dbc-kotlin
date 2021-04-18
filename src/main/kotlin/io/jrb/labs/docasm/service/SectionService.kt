@@ -23,10 +23,8 @@
  */
 package io.jrb.labs.docasm.service
 
-import io.jrb.labs.common.service.createEntity
-import io.jrb.labs.common.service.deleteEntity
-import io.jrb.labs.common.service.findEntityByGuid
-import io.jrb.labs.common.service.listAllEntities
+import io.jrb.labs.common.service.CrudServiceUtils
+import io.jrb.labs.common.service.R2dbcCrudServiceUtils
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValueType
 import io.jrb.labs.docasm.model.Section
@@ -41,8 +39,9 @@ import java.util.UUID
 
 @Service
 class SectionService(
-    val sectionRepository: SectionRepository,
-    val lookupValueService: LookupValueService
+    private val sectionRepository: SectionRepository,
+    private val lookupValueService: LookupValueService,
+    private val crudServiceUtils: CrudServiceUtils<Section> = R2dbcCrudServiceUtils(Section::class.java, sectionRepository)
 ) {
 
     @Transactional
@@ -52,7 +51,7 @@ class SectionService(
                 .type(sectionRequest.type)
                 .name(sectionRequest.name)
         )
-            .flatMap { createEntity( it, Section::class.java, sectionRepository) }
+            .flatMap { crudServiceUtils.createEntity(it) }
             .flatMap { section ->
                 val authorId = section.id!!
                 Mono.zip(
@@ -65,21 +64,21 @@ class SectionService(
 
     @Transactional
     fun deleteSection(guid: UUID): Mono<Void> {
-        return findEntityByGuid(guid, Section::class.java, sectionRepository)
+        return crudServiceUtils.findEntityByGuid(guid)
             .flatMap<Void?> { section -> lookupValueService.deleteLookupValues(EntityType.SECTION.name, section.id!!) }
-            .then(deleteEntity(guid, Section::class.java, sectionRepository))
+            .then(crudServiceUtils.deleteEntity(guid))
     }
 
     @Transactional
     fun findSectionByGuid(guid: UUID): Mono<SectionResource> {
-        return findEntityByGuid(guid, Section::class.java, sectionRepository)
+        return crudServiceUtils.findEntityByGuid(guid)
             .zipWhen { section -> lookupValueService.findLookupValueList(EntityType.SECTION.name, section.id!!) }
             .map { tuple -> SectionResource(section = tuple.t1, tags = tuple.t2) }
     }
 
     @Transactional
     fun listAllSections(): Flux<SectionResource> {
-        return listAllEntities(Section::class.java, sectionRepository)
+        return crudServiceUtils.listAllEntities()
             .map { SectionResource(section = it) }
     }
 

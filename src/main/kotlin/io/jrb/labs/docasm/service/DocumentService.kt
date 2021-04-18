@@ -23,10 +23,8 @@
  */
 package io.jrb.labs.docasm.service
 
-import io.jrb.labs.common.service.createEntity
-import io.jrb.labs.common.service.deleteEntity
-import io.jrb.labs.common.service.findEntityByGuid
-import io.jrb.labs.common.service.listAllEntities
+import io.jrb.labs.common.service.CrudServiceUtils
+import io.jrb.labs.common.service.R2dbcCrudServiceUtils
 import io.jrb.labs.docasm.model.Document
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValueType
@@ -41,8 +39,9 @@ import java.util.UUID
 
 @Service
 class DocumentService(
-    val documentRepository: DocumentRepository,
-    val lookupValueService: LookupValueService
+    private val documentRepository: DocumentRepository,
+    private val lookupValueService: LookupValueService,
+    private val crudServiceUtils: CrudServiceUtils<Document> = R2dbcCrudServiceUtils(Document::class.java, documentRepository)
 ) {
 
     @Transactional
@@ -52,7 +51,7 @@ class DocumentService(
                 .type(documentRequest.type)
                 .name(documentRequest.name)
         )
-            .flatMap { createEntity( it, Document::class.java, documentRepository) }
+            .flatMap { crudServiceUtils.createEntity(it) }
             .flatMap { author ->
                 val authorId = author.id!!
                 Mono.zip(
@@ -66,21 +65,21 @@ class DocumentService(
 
     @Transactional
     fun deleteDocument(guid: UUID): Mono<Void> {
-        return findEntityByGuid(guid, Document::class.java, documentRepository)
+        return crudServiceUtils.findEntityByGuid(guid)
             .flatMap<Void?> { document -> lookupValueService.deleteLookupValues(EntityType.DOCUMENT.name, document.id!!) }
-            .then(deleteEntity(guid, Document::class.java, documentRepository))
+            .then(crudServiceUtils.deleteEntity(guid))
     }
 
     @Transactional
     fun findDocumentByGuid(guid: UUID): Mono<DocumentResource> {
-        return findEntityByGuid(guid, Document::class.java, documentRepository)
+        return crudServiceUtils.findEntityByGuid(guid)
             .zipWhen { document -> lookupValueService.findLookupValueList(EntityType.DOCUMENT.name, document.id!!) }
             .map { tuple -> DocumentResource(document = tuple.t1, tags = tuple.t2) }
     }
 
     @Transactional
     fun listAllDocuments(): Flux<DocumentResource> {
-        return listAllEntities(Document::class.java, documentRepository)
+        return crudServiceUtils.listAllEntities()
             .map { DocumentResource(document = it) }
     }
 

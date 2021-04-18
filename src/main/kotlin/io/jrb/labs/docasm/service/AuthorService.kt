@@ -23,9 +23,8 @@
  */
 package io.jrb.labs.docasm.service
 
-import io.jrb.labs.common.service.createEntity
-import io.jrb.labs.common.service.findEntityByGuid
-import io.jrb.labs.common.service.listAllEntities
+import io.jrb.labs.common.service.CrudServiceUtils
+import io.jrb.labs.common.service.R2dbcCrudServiceUtils
 import io.jrb.labs.docasm.model.Author
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValueType
@@ -40,14 +39,15 @@ import java.util.UUID
 
 @Service
 class AuthorService(
-    val authorRepository: AuthorRepository,
-    val lookupValueService: LookupValueService
+    private val authorRepository: AuthorRepository,
+    private val lookupValueService: LookupValueService,
+    private val crudServiceUtils: CrudServiceUtils<Author> = R2dbcCrudServiceUtils(Author::class.java, authorRepository)
 ) {
 
     @Transactional
     fun create(authorRequest: AuthorRequest): Mono<AuthorResource> {
         return Mono.just(Author.Builder().name(authorRequest.name))
-            .flatMap { createEntity( it, Author::class.java, authorRepository) }
+            .flatMap { crudServiceUtils.createEntity(it) }
             .flatMap { author ->
                 val authorId = author.id!!
                 Mono.zip(
@@ -60,14 +60,14 @@ class AuthorService(
 
     @Transactional
     fun findByGuid(guid: UUID): Mono<AuthorResource> {
-        return findEntityByGuid(guid, Author::class.java, authorRepository)
+        return crudServiceUtils.findEntityByGuid(guid)
             .zipWhen { document -> lookupValueService.findLookupValueList(EntityType.AUTHOR.name, document.id!!) }
             .map { tuple -> AuthorResource(author = tuple.t1, tags = tuple.t2) }
     }
 
     @Transactional
     fun listAll(): Flux<AuthorResource> {
-        return listAllEntities(Author::class.java, authorRepository)
+        return crudServiceUtils.listAllEntities()
             .map { AuthorResource(author = it) }
     }
 
