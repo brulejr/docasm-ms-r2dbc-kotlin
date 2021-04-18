@@ -1,7 +1,6 @@
 package io.jrb.labs.docasm.service
 
 import io.jrb.labs.common.service.ResourceNotFoundException
-import io.jrb.labs.common.service.ServiceException
 import io.jrb.labs.docasm.model.Author
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValueType
@@ -22,7 +21,7 @@ class AuthorService(
     val lookupValueService: LookupValueService
 ) {
 
-    private val log = KotlinLogging.logger {}
+    val log = KotlinLogging.logger {}
 
     @Transactional
     fun create(authorRequest: AuthorRequest): Mono<AuthorResource> {
@@ -42,7 +41,7 @@ class AuthorService(
                 )
             }
             .map { tuple -> AuthorResource(author = tuple.t1, tags = tuple.t2) }
-            .onErrorResume(serviceErrorHandler("Unexpected error when creating Author"))
+            .onErrorResume(handleServiceError(log,"Unexpected error when creating Author"))
     }
 
     @Transactional
@@ -51,23 +50,14 @@ class AuthorService(
             .switchIfEmpty(Mono.error(ResourceNotFoundException("Author", guid)))
             .zipWhen { document -> lookupValueService.findLookupValueList(EntityType.AUTHOR.name, document.id!!) }
             .map { tuple -> AuthorResource(author = tuple.t1, tags = tuple.t2) }
-            .onErrorResume(serviceErrorHandler("Unexpected error when finding 'Author'"))
+            .onErrorResume(handleServiceError(log,"Unexpected error when finding 'Author'"))
     }
 
     @Transactional
     fun listAll(): Flux<AuthorResource> {
         return authorRepository.findAll()
             .map { AuthorResource(author = it) }
-            .onErrorResume(serviceErrorHandler("Unexpected error when retrieving Author"))
-    }
-
-    private fun <R> serviceErrorHandler(message: String): (Throwable) -> Mono<R> {
-        return { e ->
-            if (e !is ServiceException) {
-                log.error(e.message, e)
-            }
-            Mono.error(if (e is ServiceException) e else ServiceException(message, e))
-        }
+            .onErrorResume(handleServiceError(log,"Unexpected error when retrieving Author"))
     }
 
 }
