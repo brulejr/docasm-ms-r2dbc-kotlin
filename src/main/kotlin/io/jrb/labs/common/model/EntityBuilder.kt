@@ -23,11 +23,10 @@
  */
 package io.jrb.labs.common.model
 
-import io.jrb.labs.common.resource.Resource
 import java.time.Instant
 import java.util.UUID
 
-abstract class EntityBuilder<ENTITY: Entity, RESOURCE: Resource>(
+abstract class EntityBuilder<E: Entity>(
     protected var id: Long? = null,
     protected var guid: UUID? = UUID.randomUUID(),
     protected var createdOn: Instant? = null,
@@ -35,14 +34,21 @@ abstract class EntityBuilder<ENTITY: Entity, RESOURCE: Resource>(
     protected var modifiedOn: Instant? = null,
     protected var modifiedBy: String? = null
 ) {
-    constructor(resource: RESOURCE): this()
+    constructor(entity: E): this() {
+        this.id = entity.id
+        this.guid = entity.guid
+        this.createdOn = entity.createdOn
+        this.createdBy = entity.createdBy
+        this.modifiedOn = entity.modifiedOn
+        this.modifiedBy = entity.modifiedBy
+    }
 
-    fun id(id: Long?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.id = id }
-    fun guid(guid: UUID?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.guid = guid }
-    fun createdOn(createdOn: Instant?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.createdOn = createdOn }
-    fun createdBy(createdBy: String?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.createdBy = createdBy }
-    fun modifiedOn(modifiedOn: Instant?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.modifiedOn = modifiedOn }
-    fun modifiedBy(modifiedBy: String?) : EntityBuilder<ENTITY, RESOURCE> = apply { this.modifiedBy = modifiedBy }
+    fun id(id: Long?) : EntityBuilder<E> = apply { this.id = id }
+    fun guid(guid: UUID?) : EntityBuilder<E> = apply { this.guid = guid }
+    fun createdOn(createdOn: Instant?) : EntityBuilder<E> = apply { this.createdOn = createdOn }
+    fun createdBy(createdBy: String?) : EntityBuilder<E> = apply { this.createdBy = createdBy }
+    fun modifiedOn(modifiedOn: Instant?) : EntityBuilder<E> = apply { this.modifiedOn = modifiedOn }
+    fun modifiedBy(modifiedBy: String?) : EntityBuilder<E> = apply { this.modifiedBy = modifiedBy }
 
-    abstract fun build(): ENTITY
+    abstract fun build(): E
 }

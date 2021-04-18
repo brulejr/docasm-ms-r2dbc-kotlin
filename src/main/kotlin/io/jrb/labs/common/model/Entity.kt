@@ -23,4 +23,8 @@
  */
 package io.jrb.labs.common.model
 
+import io.jrb.labs.common.contract.FriendlyIdentifiable
+import io.jrb.labs.common.contract.Identifiable
+import io.jrb.labs.common.contract.Trackable
+
 interface Entity : Identifiable, FriendlyIdentifiable, Trackable

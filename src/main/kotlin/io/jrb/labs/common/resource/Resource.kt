@@ -23,13 +23,8 @@
  */
 package io.jrb.labs.common.resource
 
-import java.time.Instant
-import java.util.UUID
+import io.jrb.labs.common.contract.FriendlyIdentifiable
+import io.jrb.labs.common.contract.Nameable
+import io.jrb.labs.common.contract.Trackable
 
-interface Resource {
-    val guid: UUID?
-    val createdOn: Instant?
-    val createdBy: String?
-    val modifiedOn: Instant?
-    val modifiedBy: String?
-}
+interface Resource : FriendlyIdentifiable, Nameable, Trackable

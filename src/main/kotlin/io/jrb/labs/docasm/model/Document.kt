@@ -23,8 +23,8 @@
  */
 package io.jrb.labs.docasm.model
 
-import io.jrb.labs.common.contract.Entity
-import io.jrb.labs.common.contract.EntityBuilder
+import io.jrb.labs.common.model.Entity
+import io.jrb.labs.common.model.EntityBuilder
 import io.jrb.labs.docasm.constants.DocumentType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column

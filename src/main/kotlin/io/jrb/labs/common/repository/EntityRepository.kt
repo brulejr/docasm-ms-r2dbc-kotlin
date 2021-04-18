@@ -28,8 +28,8 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import reactor.core.publisher.Mono
 import java.util.UUID
 
-interface EntityRepository<ENTITY : Entity> : ReactiveCrudRepository<ENTITY, Long> {
+interface EntityRepository<E: Entity> : ReactiveCrudRepository<E, Long> {
 
-    fun findByGuid(guid: UUID): Mono<ENTITY>
+    fun findByGuid(guid: UUID): Mono<E>
 
 }

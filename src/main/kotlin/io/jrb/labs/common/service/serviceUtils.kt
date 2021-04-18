@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.service
+package io.jrb.labs.common.service
 
-import io.jrb.labs.common.service.ServiceException
 import reactor.core.publisher.Mono
 
 fun <R> handleServiceError(message: String): (Throwable) -> Mono<R> {

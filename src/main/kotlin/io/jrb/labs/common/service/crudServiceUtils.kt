@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.service
+package io.jrb.labs.common.service
 
-import io.jrb.labs.common.contract.Entity
-import io.jrb.labs.common.contract.EntityBuilder
-import io.jrb.labs.common.repository.EntityCrudRepository
-import io.jrb.labs.common.service.ResourceNotFoundException
+import io.jrb.labs.common.model.Entity
+import io.jrb.labs.common.model.EntityBuilder
+import io.jrb.labs.common.repository.EntityRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -35,7 +34,7 @@ import java.util.UUID
 fun <E: Entity> createEntity(
     entityBuilder: EntityBuilder<E>,
     entityClass: Class<E>,
-    repository: EntityCrudRepository<E>,
+    repository: EntityRepository<E>,
     entityName: String = entityClass.simpleName
 ): Mono<E> {
     return Mono.fromCallable {
@@ -53,7 +52,7 @@ fun <E: Entity> createEntity(
 fun <E: Entity> deleteEntity(
     guid: UUID,
     entityClass: Class<E>,
-    repository: EntityCrudRepository<E>,
+    repository: EntityRepository<E>,
     entityName: String = entityClass.simpleName
 ): Mono<Void> {
     return repository.findByGuid(guid)
@@ -65,7 +64,7 @@ fun <E: Entity> deleteEntity(
 fun <E: Entity> findEntityByGuid(
     guid: UUID,
     entityClass: Class<E>,
-    repository: EntityCrudRepository<E>,
+    repository: EntityRepository<E>,
     entityName: String = entityClass.simpleName
 ): Mono<E> {
     return repository.findByGuid(guid)
@@ -75,7 +74,7 @@ fun <E: Entity> findEntityByGuid(
 
 fun <E: Entity> listAllEntities(
     entityClass: Class<E>,
-    repository: EntityCrudRepository<E>,
+    repository: EntityRepository<E>,
     entityName: String = entityClass.simpleName
 ): Flux<E> {
     return repository.findAll()

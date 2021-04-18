@@ -23,6 +23,10 @@
  */
 package io.jrb.labs.docasm.service
 
+import io.jrb.labs.common.service.createEntity
+import io.jrb.labs.common.service.deleteEntity
+import io.jrb.labs.common.service.findEntityByGuid
+import io.jrb.labs.common.service.listAllEntities
 import io.jrb.labs.docasm.model.Document
 import io.jrb.labs.docasm.model.EntityType
 import io.jrb.labs.docasm.model.LookupValueType

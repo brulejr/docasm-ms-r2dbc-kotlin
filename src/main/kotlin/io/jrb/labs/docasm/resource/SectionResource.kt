@@ -24,10 +24,8 @@
 package io.jrb.labs.docasm.resource
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import io.jrb.labs.common.contract.FriendlyIdentifiable
-import io.jrb.labs.common.contract.Nameable
 import io.jrb.labs.common.contract.Tagable
-import io.jrb.labs.common.contract.Trackable
+import io.jrb.labs.common.resource.Resource
 import io.jrb.labs.docasm.constants.SectionType
 import io.jrb.labs.docasm.model.Section
 import java.time.Instant
@@ -43,7 +41,7 @@ data class SectionResource(
     override val createdBy: String?,
     override val modifiedOn: Instant?,
     override val modifiedBy: String?
-) : FriendlyIdentifiable, Nameable, Trackable, Tagable {
+) : Resource, Tagable {
 
     constructor(section: Section, tags: List<String>? = listOf()) : this(
         guid = section.guid,
