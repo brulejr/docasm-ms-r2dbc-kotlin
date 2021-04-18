@@ -24,8 +24,10 @@
 package io.jrb.labs.docasm.resource
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import io.jrb.labs.common.resource.Resource
-import io.jrb.labs.common.resource.ResourceBuilder
+import io.jrb.labs.common.contract.FriendlyIdentifiable
+import io.jrb.labs.common.contract.Nameable
+import io.jrb.labs.common.contract.Tagable
+import io.jrb.labs.common.contract.Trackable
 import io.jrb.labs.docasm.constants.SectionType
 import io.jrb.labs.docasm.model.Section
 import java.time.Instant
@@ -33,48 +35,25 @@ import java.util.UUID
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class SectionResource(
-    override val guid: UUID? = null,
+    override val guid: UUID,
     val type: SectionType,
-    val name: String,
-    val tags: List<String> = listOf(),
+    override val name: String,
+    override val tags: List<String>,
     override val createdOn: Instant?,
     override val createdBy: String?,
     override val modifiedOn: Instant?,
     override val modifiedBy: String?
-) : Resource {
+) : FriendlyIdentifiable, Nameable, Trackable, Tagable {
 
-    data class Builder(
-        private var type: SectionType? = null,
-        private var name: String? = null,
-        private var tags: MutableList<String> = mutableListOf()
-    ) : ResourceBuilder<SectionResource, Section>() {
-
-        constructor(section: Section): this() {
-            this.guid = section.guid
-            this.type = section.type
-            this.name = section.name
-            this.createdOn = section.createdOn
-            this.createdBy = section.createdBy
-            this.modifiedOn = section.modifiedOn
-            this.modifiedBy = section.modifiedBy
-        }
-
-        fun type(type: SectionType?) = apply { this.type = type }
-        fun name(name: String?) = apply { this.name = name }
-
-        fun tag(tag: String) = apply { this.tags.add(tag) }
-        fun tags(tags: List<String>) = apply { this.tags = tags.toMutableList() }
-
-        override fun build() = SectionResource(
-            guid = this.guid,
-            type = this.type!!,
-            name = this.name!!,
-            tags = this.tags,
-            createdOn = this.createdOn,
-            createdBy = this.createdBy,
-            modifiedOn = this.modifiedOn,
-            modifiedBy = this.modifiedBy
-        )
-    }
+    constructor(section: Section, tags: List<String>? = listOf()) : this(
+        guid = section.guid,
+        type = section.type,
+        name = section.name,
+        tags = tags!!,
+        createdBy = section.createdBy,
+        createdOn = section.createdOn,
+        modifiedBy = section.modifiedBy,
+        modifiedOn = section.modifiedOn
+    )
 
 }

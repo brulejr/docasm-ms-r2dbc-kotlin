@@ -23,15 +23,11 @@
  */
 package io.jrb.labs.docasm.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.fge.jsonpatch.JsonPatch
-import io.jrb.labs.common.service.CrudService
-import io.jrb.labs.docasm.model.Section
 import io.jrb.labs.docasm.model.EntityType
-import io.jrb.labs.docasm.model.LookupValue
 import io.jrb.labs.docasm.model.LookupValueType
+import io.jrb.labs.docasm.model.Section
 import io.jrb.labs.docasm.repository.SectionRepository
-import io.jrb.labs.docasm.repository.LookupValueRepository
+import io.jrb.labs.docasm.resource.SectionRequest
 import io.jrb.labs.docasm.resource.SectionResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,80 +38,45 @@ import java.util.UUID
 @Service
 class SectionService(
     val sectionRepository: SectionRepository,
-    val lookupValueRepository: LookupValueRepository,
-    val objectMapper: ObjectMapper
-) : CrudService<Section, SectionResource>(
-    sectionRepository,
-    "Section",
-    Section::class.java,
-    Section.Builder::class.java,
-    SectionResource::class.java,
-    SectionResource.Builder::class.java,
-    objectMapper
+    val lookupValueService: LookupValueService
 ) {
 
     @Transactional
-    fun createSection(sectionResource: SectionResource): Mono<SectionResource> {
-        return super.createEntity(sectionResource)
+    fun createSection(sectionRequest: SectionRequest): Mono<SectionResource> {
+        return Mono.just(
+            Section.Builder()
+                .type(sectionRequest.type)
+                .name(sectionRequest.name)
+        )
+            .flatMap { createEntity( it, Section::class.java, sectionRepository) }
             .flatMap { section ->
-                val sectionId = section.id!!
+                val authorId = section.id!!
                 Mono.zip(
                     Mono.just(section),
-                    createLookupValues(EntityType.SECTION.name, sectionId, LookupValueType.TAG.name, sectionResource.tags)
-                )}
-            .map { tuple ->
-                SectionResource.Builder(tuple.t1)
-                    .tags(tuple.t2)
-                    .build()
+                    lookupValueService.createLookupValues(EntityType.SECTION.name, authorId, LookupValueType.TAG.name, sectionRequest.tags)
+                )
             }
+            .map { tuple -> SectionResource(section = tuple.t1, tags = tuple.t2) }
     }
-
 
     @Transactional
     fun deleteSection(guid: UUID): Mono<Void> {
-        return super.findEntityByGuid(guid)
-            .flatMap { section -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.SECTION.name, section.id!!) }
-            .then(super.delete(guid))
+        return findEntityByGuid(guid, Section::class.java, sectionRepository)
+            .flatMap<Void?> { section -> lookupValueService.deleteLookupValues(EntityType.SECTION.name, section.id!!) }
+            .then(deleteEntity(guid, Section::class.java, sectionRepository))
     }
 
     @Transactional
     fun findSectionByGuid(guid: UUID): Mono<SectionResource> {
-        return super.findEntityByGuid(guid)
-            .zipWhen { section -> findLookupValueList(EntityType.SECTION.name, section.id!!) }
-            .map { tuple ->
-                val builder = SectionResource.Builder(tuple.t1)
-                tuple.t2.forEach { lookupValue ->
-                    val value = lookupValue.value
-                    when (lookupValue.valueType) {
-                        LookupValueType.TAG.name -> builder.tag(value)
-                        else -> { }
-                    }
-                }
-                builder.build()
-            }
+        return findEntityByGuid(guid, Section::class.java, sectionRepository)
+            .zipWhen { section -> lookupValueService.findLookupValueList(EntityType.SECTION.name, section.id!!) }
+            .map { tuple -> SectionResource(section = tuple.t1, tags = tuple.t2) }
     }
 
     @Transactional
     fun listAllSections(): Flux<SectionResource> {
-        return super.listAll()
-    }
-
-    @Transactional
-    fun updateSection(guid: UUID, patch: JsonPatch): Mono<SectionResource> {
-        return super.update(guid, patch)
-    }
-
-    private fun createLookupValues(entityType: String, entityId: Long, valueType: String, values: List<String>): Mono<List<String>> {
-        return Flux.fromIterable(values)
-            .map { value -> LookupValue(null, entityType, entityId, valueType, value) }
-            .flatMap { lookupValueRepository.save(it) }
-            .map(LookupValue::value)
-            .collectList()
-    }
-
-    private fun findLookupValueList(entityType: String, entityId: Long): Mono<List<LookupValue>> {
-        return lookupValueRepository.findByEntityTypeAndEntityId(entityType, entityId)
-            .collectList()
+        return listAllEntities(Section::class.java, sectionRepository)
+            .map { SectionResource(section = it) }
     }
 
 }

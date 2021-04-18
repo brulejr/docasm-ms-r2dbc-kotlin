@@ -23,10 +23,9 @@
  */
 package io.jrb.labs.docasm.model
 
-import io.jrb.labs.common.model.Entity
-import io.jrb.labs.common.model.EntityBuilder
+import io.jrb.labs.common.contract.Entity
+import io.jrb.labs.common.contract.EntityBuilder
 import io.jrb.labs.docasm.constants.SectionType
-import io.jrb.labs.docasm.resource.SectionResource
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -36,11 +35,12 @@ import java.util.UUID
 @Table(value = "t_section")
 data class Section(
 
+    @Id
     @Column(value = "se_id")
     override val id: Long? = null,
 
     @Column(value = "se_guid")
-    override val guid: UUID? = null,
+    override val guid: UUID,
 
     @Column(value = "se_type")
     val type: SectionType,
@@ -65,26 +65,10 @@ data class Section(
     data class Builder(
         private var type: SectionType? = null,
         private var name: String? = null
-    ) : EntityBuilder<Section, SectionResource>() {
-        constructor(sectionResource: SectionResource) : this() {
-            this.guid = sectionResource.guid
-            this.type = sectionResource.type
-            this.name = sectionResource.name
-            this.createdBy = sectionResource.createdBy
-            this.createdOn = sectionResource.createdOn
-            this.modifiedBy = sectionResource.modifiedBy
-            this.modifiedOn = sectionResource.modifiedOn
-        }
-
+    ) : EntityBuilder<Section>() {
         constructor(section: Section) : this() {
-            this.id = section.id
-            this.guid = section.guid
             this.type = section.type
             this.name = section.name
-            this.createdOn = section.createdOn
-            this.createdBy = section.createdBy
-            this.modifiedOn = section.modifiedOn
-            this.modifiedBy = section.modifiedBy
         }
 
         fun type(type: SectionType?) = apply { this.type = type }
@@ -92,7 +76,7 @@ data class Section(
 
         override fun build() = Section(
             id = this.id,
-            guid = this.guid,
+            guid = this.guid!!,
             type = this.type!!,
             name = this.name!!,
             createdOn = this.createdOn,

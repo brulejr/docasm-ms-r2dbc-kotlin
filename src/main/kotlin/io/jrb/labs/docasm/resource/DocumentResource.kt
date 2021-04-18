@@ -24,57 +24,36 @@
 package io.jrb.labs.docasm.resource
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import io.jrb.labs.common.resource.Resource
-import io.jrb.labs.common.resource.ResourceBuilder
-import io.jrb.labs.docasm.model.Document
+import io.jrb.labs.common.contract.FriendlyIdentifiable
+import io.jrb.labs.common.contract.Nameable
+import io.jrb.labs.common.contract.Tagable
+import io.jrb.labs.common.contract.Trackable
 import io.jrb.labs.docasm.constants.DocumentType
+import io.jrb.labs.docasm.model.Document
 import java.time.Instant
 import java.util.UUID
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class DocumentResource(
-    override val guid: UUID? = null,
+    override val guid: UUID,
     val type: DocumentType,
-    val name: String,
-    val tags: List<String> = listOf(),
+    override val name: String,
+    override val tags: List<String>,
     override val createdOn: Instant?,
     override val createdBy: String?,
     override val modifiedOn: Instant?,
     override val modifiedBy: String?
-) : Resource {
+) : FriendlyIdentifiable, Nameable, Trackable, Tagable {
 
-    data class Builder(
-        private var type: DocumentType? = null,
-        private var name: String? = null,
-        private var tags: MutableList<String> = mutableListOf()
-    ) : ResourceBuilder<DocumentResource, Document>() {
-
-        constructor(document: Document): this() {
-            this.guid = document.guid
-            this.type = document.type
-            this.name = document.name
-            this.createdOn = document.createdOn
-            this.createdBy = document.createdBy
-            this.modifiedOn = document.modifiedOn
-            this.modifiedBy = document.modifiedBy
-        }
-
-        fun type(type: DocumentType?) = apply { this.type = type }
-        fun name(name: String?) = apply { this.name = name }
-
-        fun tag(tag: String) = apply { this.tags.add(tag) }
-        fun tags(tags: List<String>) = apply { this.tags = tags.toMutableList() }
-
-        override fun build() = DocumentResource(
-            guid = this.guid,
-            type = this.type!!,
-            name = this.name!!,
-            tags = this.tags,
-            createdOn = this.createdOn,
-            createdBy = this.createdBy,
-            modifiedOn = this.modifiedOn,
-            modifiedBy = this.modifiedBy
-        )
-    }
+    constructor(document: Document, tags: List<String>? = listOf()) : this(
+        guid = document.guid,
+        type = document.type,
+        name = document.name,
+        tags = tags!!,
+        createdBy = document.createdBy,
+        createdOn = document.createdOn,
+        modifiedBy = document.modifiedBy,
+        modifiedOn = document.modifiedOn
+    )
 
 }

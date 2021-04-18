@@ -23,10 +23,9 @@
  */
 package io.jrb.labs.docasm.model
 
-import io.jrb.labs.common.model.Entity
-import io.jrb.labs.common.model.EntityBuilder
+import io.jrb.labs.common.contract.Entity
+import io.jrb.labs.common.contract.EntityBuilder
 import io.jrb.labs.docasm.constants.DocumentType
-import io.jrb.labs.docasm.resource.DocumentResource
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -36,11 +35,12 @@ import java.util.UUID
 @Table(value = "t_document")
 data class Document(
 
+    @Id
     @Column(value = "do_id")
     override val id: Long? = null,
 
     @Column(value = "do_guid")
-    override val guid: UUID? = null,
+    override val guid: UUID,
 
     @Column(value = "do_type")
     val type: DocumentType,
@@ -65,26 +65,10 @@ data class Document(
     data class Builder(
         private var type: DocumentType? = null,
         private var name: String? = null
-    ) : EntityBuilder<Document, DocumentResource>() {
-        constructor(documentResource: DocumentResource) : this() {
-            this.guid = documentResource.guid
-            this.type = documentResource.type
-            this.name = documentResource.name
-            this.createdBy = documentResource.createdBy
-            this.createdOn = documentResource.createdOn
-            this.modifiedBy = documentResource.modifiedBy
-            this.modifiedOn = documentResource.modifiedOn
-        }
-
+    ) : EntityBuilder<Document>() {
         constructor(document: Document) : this() {
-            this.id = document.id
-            this.guid = document.guid
             this.type = document.type
             this.name = document.name
-            this.createdOn = document.createdOn
-            this.createdBy = document.createdBy
-            this.modifiedOn = document.modifiedOn
-            this.modifiedBy = document.modifiedBy
         }
 
         fun type(type: DocumentType?) = apply { this.type = type }
@@ -92,7 +76,7 @@ data class Document(
 
         override fun build() = Document(
             id = this.id,
-            guid = this.guid,
+            guid = this.guid!!,
             type = this.type!!,
             name = this.name!!,
             createdOn = this.createdOn,

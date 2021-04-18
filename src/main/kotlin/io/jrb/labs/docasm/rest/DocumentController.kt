@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.docasm.rest
 
+import io.jrb.labs.docasm.resource.DocumentRequest
 import io.jrb.labs.docasm.resource.DocumentResource
 import io.jrb.labs.docasm.service.DocumentService
 import mu.KotlinLogging
@@ -51,8 +52,8 @@ class DocumentController(val documentService: DocumentService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createDocument(@RequestBody documentResource: DocumentResource): Mono<EntityModel<DocumentResource>> {
-        return documentService.createDocument(documentResource).map {
+    fun createDocument(@RequestBody documentRequest: DocumentRequest): Mono<EntityModel<DocumentResource>> {
+        return documentService.createDocument(documentRequest).map {
             EntityModel.of(it)
                 .add(selfLink(it.guid!!))
                 .add(collectionLink())

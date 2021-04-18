@@ -23,9 +23,9 @@
  */
 package io.jrb.labs.docasm.repository
 
-import io.jrb.labs.common.repository.EntityRepository
+import io.jrb.labs.common.repository.EntityCrudRepository
 import io.jrb.labs.docasm.model.Document
 import org.springframework.stereotype.Repository
 
 @Repository
-interface DocumentRepository : EntityRepository<Document>
+interface DocumentRepository : EntityCrudRepository<Document>

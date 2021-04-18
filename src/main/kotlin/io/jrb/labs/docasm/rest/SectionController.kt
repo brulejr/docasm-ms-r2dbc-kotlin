@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.docasm.rest
 
+import io.jrb.labs.docasm.resource.SectionRequest
 import io.jrb.labs.docasm.resource.SectionResource
 import io.jrb.labs.docasm.service.SectionService
 import mu.KotlinLogging
@@ -51,8 +52,8 @@ class SectionController(val sectionService: SectionService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createSection(@RequestBody sectionResource: SectionResource): Mono<EntityModel<SectionResource>> {
-        return sectionService.createSection(sectionResource).map {
+    fun createSection(@RequestBody sectionRequest: SectionRequest): Mono<EntityModel<SectionResource>> {
+        return sectionService.createSection(sectionRequest).map {
             EntityModel.of(it)
                 .add(selfLink(it.guid!!))
                 .add(collectionLink())

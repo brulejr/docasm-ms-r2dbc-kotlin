@@ -17,6 +17,10 @@ class LookupValueService(val lookupValueRepository: LookupValueRepository) {
             .collectList()
     }
 
+    fun deleteLookupValues(entityType: String, entityId: Long): Mono<Void> {
+        return lookupValueRepository.deleteByEntityTypeAndEntityId(entityType, entityId)
+    }
+
     fun findLookupValueList(entityType: String, entityId: Long): Mono<List<String>> {
         return lookupValueRepository.findByEntityTypeAndEntityId(entityType, entityId)
             .map { it.value }

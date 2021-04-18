@@ -25,8 +25,8 @@ package io.jrb.labs.docasm.config
 
 import io.jrb.labs.docasm.constants.DocumentType
 import io.jrb.labs.docasm.constants.SectionType
-import io.jrb.labs.docasm.resource.DocumentResource
-import io.jrb.labs.docasm.resource.SectionResource
+import io.jrb.labs.docasm.resource.DocumentRequest
+import io.jrb.labs.docasm.resource.SectionRequest
 import io.jrb.labs.docasm.service.DocumentService
 import io.jrb.labs.docasm.service.SectionService
 import mu.KotlinLogging
@@ -52,7 +52,7 @@ class DemoInitializer(
         log.info("Creating Documents")
         log.info("------------------")
         Flux.fromIterable(Arrays.asList(
-            DocumentResource.Builder().name("Document1").type(DocumentType.SONG_SET_LIST).tag("A").build()
+            DocumentRequest(name = "Document1", type = DocumentType.SONG_SET_LIST, tags = listOf("A"))
         ))
             .flatMap { documentService.createDocument(it) }
             .blockLast(Duration.ofSeconds(10))
@@ -69,7 +69,7 @@ class DemoInitializer(
         log.info("Creating Section")
         log.info("----------------")
         Flux.fromIterable(Arrays.asList(
-            SectionResource.Builder().name("Sectiion1").type(SectionType.SONG).tag("A").build()
+            SectionRequest(name = "Secti    on1", type = SectionType.SONG, tags = listOf("A"))
         ))
             .flatMap { sectionService.createSection(it) }
             .blockLast(Duration.ofSeconds(10))

@@ -23,15 +23,11 @@
  */
 package io.jrb.labs.docasm.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.fge.jsonpatch.JsonPatch
-import io.jrb.labs.common.service.CrudService
 import io.jrb.labs.docasm.model.Document
 import io.jrb.labs.docasm.model.EntityType
-import io.jrb.labs.docasm.model.LookupValue
 import io.jrb.labs.docasm.model.LookupValueType
 import io.jrb.labs.docasm.repository.DocumentRepository
-import io.jrb.labs.docasm.repository.LookupValueRepository
+import io.jrb.labs.docasm.resource.DocumentRequest
 import io.jrb.labs.docasm.resource.DocumentResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,80 +38,46 @@ import java.util.UUID
 @Service
 class DocumentService(
     val documentRepository: DocumentRepository,
-    val lookupValueRepository: LookupValueRepository,
-    val objectMapper: ObjectMapper
-) : CrudService<Document, DocumentResource>(
-    documentRepository,
-    "Document",
-    Document::class.java,
-    Document.Builder::class.java,
-    DocumentResource::class.java,
-    DocumentResource.Builder::class.java,
-    objectMapper
+    val lookupValueService: LookupValueService
 ) {
 
     @Transactional
-    fun createDocument(documentResource: DocumentResource): Mono<DocumentResource> {
-        return super.createEntity(documentResource)
-            .flatMap { document ->
-                val documentId = document.id!!
+    fun createDocument(documentRequest: DocumentRequest): Mono<DocumentResource> {
+        return Mono.just(
+            Document.Builder()
+                .type(documentRequest.type)
+                .name(documentRequest.name)
+        )
+            .flatMap { createEntity( it, Document::class.java, documentRepository) }
+            .flatMap { author ->
+                val authorId = author.id!!
                 Mono.zip(
-                    Mono.just(document),
-                    createLookupValues(EntityType.DOCUMENT.name, documentId, LookupValueType.TAG.name, documentResource.tags)
-                )}
-            .map { tuple ->
-                DocumentResource.Builder(tuple.t1)
-                    .tags(tuple.t2)
-                    .build()
+                    Mono.just(author),
+                    lookupValueService.createLookupValues(EntityType.DOCUMENT.name, authorId, LookupValueType.TAG.name, documentRequest.tags)
+                )
             }
+            .map { tuple -> DocumentResource(document = tuple.t1, tags = tuple.t2) }
     }
 
 
     @Transactional
     fun deleteDocument(guid: UUID): Mono<Void> {
-        return super.findEntityByGuid(guid)
-            .flatMap { document -> lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.DOCUMENT.name, document.id!!) }
-            .then(super.delete(guid))
+        return findEntityByGuid(guid, Document::class.java, documentRepository)
+            .flatMap<Void?> { document -> lookupValueService.deleteLookupValues(EntityType.DOCUMENT.name, document.id!!) }
+            .then(deleteEntity(guid, Document::class.java, documentRepository))
     }
 
     @Transactional
     fun findDocumentByGuid(guid: UUID): Mono<DocumentResource> {
-        return super.findEntityByGuid(guid)
-            .zipWhen { document -> findLookupValueList(EntityType.DOCUMENT.name, document.id!!) }
-            .map { tuple ->
-                val builder = DocumentResource.Builder(tuple.t1)
-                tuple.t2.forEach { lookupValue ->
-                    val value = lookupValue.value
-                    when (lookupValue.valueType) {
-                        LookupValueType.TAG.name -> builder.tag(value)
-                        else -> { }
-                    }
-                }
-                builder.build()
-            }
+        return findEntityByGuid(guid, Document::class.java, documentRepository)
+            .zipWhen { document -> lookupValueService.findLookupValueList(EntityType.DOCUMENT.name, document.id!!) }
+            .map { tuple -> DocumentResource(document = tuple.t1, tags = tuple.t2) }
     }
 
     @Transactional
     fun listAllDocuments(): Flux<DocumentResource> {
-        return super.listAll()
-    }
-
-    @Transactional
-    fun updateDocument(guid: UUID, patch: JsonPatch): Mono<DocumentResource> {
-        return super.update(guid, patch)
-    }
-
-    private fun createLookupValues(entityType: String, entityId: Long, valueType: String, values: List<String>): Mono<List<String>> {
-        return Flux.fromIterable(values)
-            .map { value -> LookupValue(null, entityType, entityId, valueType, value) }
-            .flatMap { lookupValueRepository.save(it) }
-            .map(LookupValue::value)
-            .collectList()
-    }
-
-    private fun findLookupValueList(entityType: String, entityId: Long): Mono<List<LookupValue>> {
-        return lookupValueRepository.findByEntityTypeAndEntityId(entityType, entityId)
-            .collectList()
+        return listAllEntities(Document::class.java, documentRepository)
+            .map { DocumentResource(document = it) }
     }
 
 }
