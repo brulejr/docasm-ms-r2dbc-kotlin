@@ -23,8 +23,32 @@
  */
 package io.jrb.labs.common.contract
 
+import java.time.Instant
 import java.util.UUID
 
-interface FriendlyIdentifiable {
-    val guid: UUID
+abstract class EntityBuilder<E: Entity>(
+    protected var id: Long? = null,
+    protected var guid: UUID? = UUID.randomUUID(),
+    protected var createdOn: Instant? = null,
+    protected var createdBy: String? = null,
+    protected var modifiedOn: Instant? = null,
+    protected var modifiedBy: String? = null
+) {
+    constructor(entity: E): this() {
+        this.id = entity.id
+        this.guid = entity.guid
+        this.createdOn = entity.createdOn
+        this.createdBy = entity.createdBy
+        this.modifiedOn = entity.modifiedOn
+        this.modifiedBy = entity.modifiedBy
+    }
+
+    fun id(id: Long?) : EntityBuilder<E> = apply { this.id = id }
+    fun guid(guid: UUID?) : EntityBuilder<E> = apply { this.guid = guid }
+    fun createdOn(createdOn: Instant?) : EntityBuilder<E> = apply { this.createdOn = createdOn }
+    fun createdBy(createdBy: String?) : EntityBuilder<E> = apply { this.createdBy = createdBy }
+    fun modifiedOn(modifiedOn: Instant?) : EntityBuilder<E> = apply { this.modifiedOn = modifiedOn }
+    fun modifiedBy(modifiedBy: String?) : EntityBuilder<E> = apply { this.modifiedBy = modifiedBy }
+
+    abstract fun build(): E
 }

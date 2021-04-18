@@ -21,11 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.repository
+package io.jrb.labs.common.contract
 
-import io.jrb.labs.common.repository.EntityCrudRepository
-import io.jrb.labs.docasm.model.Author
-import org.springframework.stereotype.Repository
-
-@Repository
-interface AuthorRepository : EntityCrudRepository<Author>
+interface Resource : FriendlyIdentifiable, Trackable

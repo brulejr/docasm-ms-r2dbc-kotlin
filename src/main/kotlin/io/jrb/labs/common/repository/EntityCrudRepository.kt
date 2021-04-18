@@ -21,11 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.docasm.repository
+package io.jrb.labs.common.repository
 
-import io.jrb.labs.common.repository.EntityCrudRepository
-import io.jrb.labs.docasm.model.Author
-import org.springframework.stereotype.Repository
+import io.jrb.labs.common.contract.Entity
+import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import reactor.core.publisher.Mono
+import java.util.UUID
 
-@Repository
-interface AuthorRepository : EntityCrudRepository<Author>
+interface EntityCrudRepository<E: Entity> : ReactiveCrudRepository<E, Long> {
+
+    fun findByGuid(guid: UUID): Mono<E>
+
+}
