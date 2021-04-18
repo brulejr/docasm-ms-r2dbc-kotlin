@@ -32,7 +32,6 @@ import io.jrb.labs.docasm.model.LookupValueType
 import io.jrb.labs.docasm.repository.AuthorRepository
 import io.jrb.labs.docasm.resource.AuthorRequest
 import io.jrb.labs.docasm.resource.AuthorResource
-import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
@@ -44,8 +43,6 @@ class AuthorService(
     val authorRepository: AuthorRepository,
     val lookupValueService: LookupValueService
 ) {
-
-    val log = KotlinLogging.logger {}
 
     @Transactional
     fun create(authorRequest: AuthorRequest): Mono<AuthorResource> {
