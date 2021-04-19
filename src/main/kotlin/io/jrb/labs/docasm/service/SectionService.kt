@@ -40,9 +40,10 @@ import java.util.UUID
 @Service
 class SectionService(
     private val sectionRepository: SectionRepository,
-    private val lookupValueService: LookupValueService,
-    private val crudServiceUtils: CrudServiceUtils<Section> = R2dbcCrudServiceUtils(Section::class.java, sectionRepository)
+    private val lookupValueService: LookupValueService
 ) {
+
+    private val crudServiceUtils: CrudServiceUtils<Section> = R2dbcCrudServiceUtils(Section::class.java, sectionRepository)
 
     @Transactional
     fun createSection(sectionRequest: SectionRequest): Mono<SectionResource> {

@@ -40,9 +40,10 @@ import java.util.UUID
 @Service
 class DocumentService(
     private val documentRepository: DocumentRepository,
-    private val lookupValueService: LookupValueService,
-    private val crudServiceUtils: CrudServiceUtils<Document> = R2dbcCrudServiceUtils(Document::class.java, documentRepository)
+    private val lookupValueService: LookupValueService
 ) {
+
+    private val crudServiceUtils: CrudServiceUtils<Document> = R2dbcCrudServiceUtils(Document::class.java, documentRepository)
 
     @Transactional
     fun createDocument(documentRequest: DocumentRequest): Mono<DocumentResource> {

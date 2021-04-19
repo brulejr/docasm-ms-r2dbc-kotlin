@@ -40,9 +40,10 @@ import java.util.UUID
 @Service
 class AuthorService(
     private val authorRepository: AuthorRepository,
-    private val lookupValueService: LookupValueService,
-    private val crudServiceUtils: CrudServiceUtils<Author> = R2dbcCrudServiceUtils(Author::class.java, authorRepository)
+    private val lookupValueService: LookupValueService
 ) {
+
+    private val crudServiceUtils: CrudServiceUtils<Author> = R2dbcCrudServiceUtils(Author::class.java, authorRepository)
 
     @Transactional
     fun create(authorRequest: AuthorRequest): Mono<AuthorResource> {
